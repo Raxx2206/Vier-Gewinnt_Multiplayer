@@ -1,0 +1,24 @@
+{
+  "name": "vier-gewinnt_multiplayer",
+  "version": "1.0.0",
+  "description": "Vier-Gewinnt ============",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Raxx2206/Vier-Gewinnt_Multiplayer.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Raxx2206/Vier-Gewinnt_Multiplayer/issues"
+  },
+  "homepage": "https://github.com/Raxx2206/Vier-Gewinnt_Multiplayer#readme",
+  "dependencies": {
+    "express": "^4.16.4",
+    "socket.io": "^2.2.0"
+  }
+}
