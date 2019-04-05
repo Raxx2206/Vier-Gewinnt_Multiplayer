@@ -16,9 +16,28 @@ playFieldArray[6] = new Array(6);
 
 initPlayField();
 
+var wait = false; // if ture wait till other player moved
+var socket = io(); // connect to socket
+socket.on('player moved', function (msg) {
+    putChip(msg);
+});
+
+socket.on('connected', function (msg) {
+    wait = msg !== 0;
+    if(wait) { switchPlayer(); }
+});
+
+function clicked(column) {
+    if(wait) { return; } // TODO alert or so!
+    putChip(column);
+
+    wait = true; // wait till other player moved
+    socket.emit('player moved', column);
+}
+
 // Funktion, die aufgerufen wird, wenn eine Spalte angeklickt wird
 function putChip(column) {
-	var selectedCircle;
+    var selectedCircle;
     // Herausfinden des obersten freien Feldes in der angeklickten Spalte; -1, wenn voll
     availableRow = checkAvailableRow(column);
     // Fehlermeldung, wenn Spalte bereits voll ist
@@ -29,54 +48,54 @@ function putChip(column) {
     // Inkrementieren der Variablen, da checkAvailableRow() die Nummer der Zeile zurückgibt, hier aber der Arrayindex benötigt wird
     availableRow++;
 
-	switch(column) {
-		case 0:
-        // Handle auf oberstes freies Div in der angeklickten Spalte besorgen
-		selectedCircle = $("div#column1 > div:nth-child(" + availableRow + ")");
-        // Oberstes freies Feld in der angeklickten Spalte belegen
-		occupyTopmostRow(0);
-		break;
+    switch (column) {
+        case 0:
+            // Handle auf oberstes freies Div in der angeklickten Spalte besorgen
+            selectedCircle = $("div#column1 > div:nth-child(" + availableRow + ")");
+            // Oberstes freies Feld in der angeklickten Spalte belegen
+            occupyTopmostRow(0);
+            break;
 
-		case 1:
-		selectedCircle = $("div#column2 > div:nth-child(" + availableRow + ")");
-		occupyTopmostRow(1);
-		break;
+        case 1:
+            selectedCircle = $("div#column2 > div:nth-child(" + availableRow + ")");
+            occupyTopmostRow(1);
+            break;
 
-		case 2:
-		selectedCircle = $("div#column3 > div:nth-child(" + availableRow + ")");
-		occupyTopmostRow(2);
-		break;
+        case 2:
+            selectedCircle = $("div#column3 > div:nth-child(" + availableRow + ")");
+            occupyTopmostRow(2);
+            break;
 
-		case 3:
-		selectedCircle = $("div#column4 > div:nth-child(" + availableRow + ")");
-		occupyTopmostRow(3);
-		break;
+        case 3:
+            selectedCircle = $("div#column4 > div:nth-child(" + availableRow + ")");
+            occupyTopmostRow(3);
+            break;
 
-		case 4:
-		selectedCircle = $("div#column5 > div:nth-child(" + availableRow + ")");
-		occupyTopmostRow(4);
-		break;
+        case 4:
+            selectedCircle = $("div#column5 > div:nth-child(" + availableRow + ")");
+            occupyTopmostRow(4);
+            break;
 
-		case 5:
-		selectedCircle = $("div#column6 > div:nth-child(" + availableRow + ")");
-		occupyTopmostRow(5);
-		break;
+        case 5:
+            selectedCircle = $("div#column6 > div:nth-child(" + availableRow + ")");
+            occupyTopmostRow(5);
+            break;
 
-		case 6:
-		selectedCircle = $("div#column7 > div:nth-child(" + availableRow + ")");
-		occupyTopmostRow(6);
-		break;
-	}
-    selectedCircle.addClass(currentPlayerColor).removeClass(otherPlayerColor);
+        case 6:
+            selectedCircle = $("div#column7 > div:nth-child(" + availableRow + ")");
+            occupyTopmostRow(6);
+            break;
+    }
+    selectedCircle.addClass(currentPlayerColor);
     // Feld in Spielerfarbe einfärben (siehe CSS)
 
     // Erhöhen des Zugzählers
     // Testen ob der aktuelle Spieler gewonnen hat oder das Spielfeld voll ist
     if (checkIfWon()) {
         $("div.indicatorContainer").hide();
-        alert((currentPlayer==="red"?"Rot":"Blau") + " gewinnt!");
+        alert((currentPlayer === "red" ? "Rot" : "Blau") + " gewinnt!");
         $("div#restart").show();
-        var divs = $("div#playfield div.column")
+        var divs = $("div#playfield div.column");
         divs.prop("onclick", null);
         return;
         // Meldung, wenn Spieler gewonnen hat
@@ -85,7 +104,7 @@ function putChip(column) {
         $("div.indicatorContainer").hide();
         alert("Unentschieden!");
         $("div#restart").show();
-        var divs = $("div#playfield div.column")
+        var divs = $("div#playfield div.column");
         divs.prop("onclick", null);
         return;
         // Meldung, wenn Spiel unentschieden
@@ -93,42 +112,40 @@ function putChip(column) {
     // Wechsel zum anderen Spieler
     switchPlayer();
     movecount++;
-
-};
+    wait = false;
+}
 
 function switchPlayer() {
-	switch (currentPlayer) {
-		case "red":
-			currentPlayer = "blue";
-			currentPlayerColor = "circleBlue";
-			otherPlayerColor = "circleRed";
+    switch (currentPlayer) {
+        case "red":
+            currentPlayer = "blue";
+            currentPlayerColor = "circleBlue";
+            otherPlayerColor = "circleRed";
             $("div.indicatorContainerLeft").show();
             $("div.indicatorContainerRight").hide();
-			break;
-		case "blue":
-			currentPlayer = "red";
-			currentPlayerColor = "circleRed";
-			otherPlayerColor = "circleBlue";
+            break;
+        case "blue":
+            currentPlayer = "red";
+            currentPlayerColor = "circleRed";
+            otherPlayerColor = "circleBlue";
             $("div.indicatorContainerLeft").hide();
             $("div.indicatorContainerRight").show();
-			break;
-	};
-};
-
+            break;
+    }
+}
 // Funktion zur Bestimmung des obersten freien Feldes einer Spalte
 function checkAvailableRow(column) {
-    for (var i = 5 ; i >= 0 ; i--) {
+    for (var i = 5; i >= 0; i--) {
         if (playFieldArray[column][i] === "white") {
             return i;
         }
     }
     return -1;
-};
-
+}
 // Funktion zum Belegen des obersten freien Feldes einer Spalte mit der Farbe des aktuellen Spielers
-function occupyTopmostRow (column) {
-	playFieldArray[column][checkAvailableRow(column)] = currentPlayer;
-	return;
+function occupyTopmostRow(column) {
+    playFieldArray[column][checkAvailableRow(column)] = currentPlayer;
+
 }
 
 // Funktion zur Bestimmung, ob der aktuelle Spieler gewonnen hat
@@ -219,12 +236,13 @@ function checkForFour(input) {
 }
 
 // Methode zum rekursiven Kopieren von Objekten
-Object.prototype.clone = function() {
+Object.prototype.clone = function () {
     var newObj = (this instanceof Array) ? [] : {};
     for (i in this) {
         if (i == 'clone') continue;
         if (this[i] && typeof this[i] == "object") {
             newObj[i] = this[i].clone();
         } else newObj[i] = this[i]
-    } return newObj;
+    }
+    return newObj;
 };
